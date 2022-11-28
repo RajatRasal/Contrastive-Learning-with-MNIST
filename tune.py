@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List, Optional, Union
 
-from pytorch_lightning import Callback, Trainer, LightningModule
+from pytorch_lightning import Callback, LightningModule, Trainer
 from ray import air, tune
 from ray.tune import CLIReporter
 
@@ -12,8 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class TuneReportCallbackOnValidationEnd(Callback):
-
-    def __init__(self, metrics: Optional[Union[str, List[str], Dict[str, str]]] = None):
+    def __init__(
+        self,
+        metrics: Optional[Union[str, List[str], Dict[str, str]]] = None,
+    ):
         if isinstance(metrics, str):
             metrics = [metrics]
         self._metrics = metrics
@@ -23,7 +25,9 @@ class TuneReportCallbackOnValidationEnd(Callback):
         if trainer.sanity_checking:
             return
         if not self._metrics:
-            report_dict = {k: v.item() for k, v in trainer.callback_metrics.items()}
+            report_dict = {
+                k: v.item() for k, v in trainer.callback_metrics.items()
+            }
         else:
             report_dict = {}
             for key in self._metrics:
@@ -63,6 +67,7 @@ def _train_mnist_classifier(config):
     del config["max_epochs"]
     del config["val_check_freq"]
     train_mnist_classifier(trainer, **config)
+
 
 def tune_mnist_classifier():
     max_epochs = 20

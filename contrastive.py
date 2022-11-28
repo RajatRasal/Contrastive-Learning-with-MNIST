@@ -1,16 +1,17 @@
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
 from pytorch_metric_learning import losses
 from torch import nn
 
 
 class MNISTSupContrast(pl.LightningModule):
-
     def __init__(self, encoder: nn.Module, head: nn.Module, lr: float):
         super().__init__()
+
+        # Hyperparameters
         self.lr = lr
 
+        # Neural Networks
         self.encoder = nn.Sequential(encoder, head)
         self.loss = losses.ContrastiveLoss(pos_margin=0.25, neg_margin=1.5)
 

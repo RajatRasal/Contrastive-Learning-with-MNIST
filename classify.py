@@ -6,15 +6,18 @@ from torch import nn, optim
 
 
 class MNISTClassifier(pl.LightningModule):
-
     def __init__(self, encoder: nn.Module, cls_head: nn.Module, lr: float):
         super().__init__()
-        
+
         # Hyperparameters
         self.lr = lr
 
         # Neural Networks
-        self.classifier = nn.Sequential(encoder, cls_head, nn.LogSoftmax(dim=1))
+        self.classifier = nn.Sequential(
+            encoder,
+            cls_head,
+            nn.LogSoftmax(dim=1),
+        )
 
         # Metrics
         self.train_loss = torchmetrics.MeanMetric()
@@ -37,7 +40,7 @@ class MNISTClassifier(pl.LightningModule):
         loss_agg.update(loss)
         acc_agg.update(pred, batch[1])
         return loss
-    
+
     def __epoch_end(self, log_str, loss_agg, acc_agg, prog_bar=False):
         self.log(f"{log_str} Accuracy", acc_agg.compute())
         self.log(f"{log_str} Loss", loss_agg.compute(), prog_bar=prog_bar)

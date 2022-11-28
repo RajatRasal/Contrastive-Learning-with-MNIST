@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 
-
 _ACTIVATIONS = {
     "relu": nn.ReLU,
     "gelu": nn.GELU,
@@ -12,15 +11,35 @@ _POOLING = {
     "avg": nn.AvgPool2d,
 }
 
-class ConvUnit(nn.Module):
 
-    def __init__(self, input_channels: int, output_channels: int, kernel_size: int, stride: int, padding: int, pool_type: str, pool_kernel_size: int, pool_stride: int, activ_type: str,  **activ_kwargs):
+class ConvUnit(nn.Module):
+    def __init__(
+        self,
+        input_channels: int,
+        output_channels: int,
+        kernel_size: int,
+        stride: int,
+        padding: int,
+        pool_type: str,
+        pool_kernel_size: int,
+        pool_stride: int,
+        activ_type: str,
+        **activ_kwargs,
+    ):
         super().__init__()
 
-        self.conv = nn.Conv2d(input_channels, output_channels, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.conv = nn.Conv2d(
+            input_channels,
+            output_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+        )
         self.bn = nn.BatchNorm2d(output_channels)
         self.activ = _ACTIVATIONS[activ_type](**activ_kwargs)
-        self.pool = _POOLING[pool_type](kernel_size=pool_kernel_size, stride=pool_stride)
+        self.pool = _POOLING[pool_type](
+            kernel_size=pool_kernel_size, stride=pool_stride
+        )
 
     def forward(self, x):
         return self.pool(self.activ(self.bn(self.conv(x))))
@@ -63,7 +82,6 @@ class MNISTConvEncoder(nn.Module):
 
 
 class LinearHead(nn.Module):
-
     def __init__(self, input_dim: int, output_dim: int):
         super().__init__()
         self.head = nn.Linear(input_dim, output_dim)
