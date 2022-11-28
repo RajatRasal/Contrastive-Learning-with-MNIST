@@ -20,7 +20,7 @@ def get_trainer(max_epochs: int, val_check_freq: int, callbacks=None):
 def train_mnist_classifier(trainer, batch_size, lr, pooling, activation, seed):
     seed_everything(seed)
 
-    dm = MNISTDataModule(".", batch_size=batch_size)
+    dm = MNISTDataModule("~/", batch_size=batch_size)
     encoder = MNISTConvEncoder(activation, pooling)
     cls_head = LinearHead(MNISTConvEncoder.backbone_output_size, 10)
     model = MNISTClassifier(encoder, cls_head, lr=lr)
@@ -42,7 +42,8 @@ if __name__ == "__main__":
 
     if not args.pretrain:
         trainer = get_trainer(
-            max_epochs=args.epochs, val_check_freq=args.val_check_freq
+            max_epochs=args.epochs,
+            val_check_freq=args.val_check_freq,
         )
         train_mnist_classifier(
             trainer,
@@ -55,13 +56,13 @@ if __name__ == "__main__":
     else:
         seed_everything(args.seed)
 
-        dm = MNISTDataModule(".", batch_size=256)
+        dm = MNISTDataModule("~/", batch_size=256)
         encoder = MNISTConvEncoder()
         sup_con_head = LinearHead(MNISTConvEncoder.backbone_output_size, 256)
         model = MNISTSupContrast(encoder, sup_con_head, lr=5e-3)
         get_trainer(max_epochs=10, val_check_freq=5).fit(model, datamodule=dm)
 
-        dm = MNISTDataModule(".", batch_size=256)
+        dm = MNISTDataModule("~/", batch_size=256)
         cls_head = LinearHead(MNISTConvEncoder.backbone_output_size, 10)
         model = MNISTClassifier(
             encoder.requires_grad_(False), cls_head, lr=1e-3

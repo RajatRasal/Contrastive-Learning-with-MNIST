@@ -4,7 +4,9 @@
 
 
 #### Without pretraining
-Batch size = 256, Epochs = 20
+Fixed hyperparameters:
+- batch size = 256
+- epochs = 20
 
 | Activation   | Pooling   |   LR |   Val Accuracy |   Train Accuracy |
 |--------------|-----------|------|-----------|-------------|
