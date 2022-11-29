@@ -6,7 +6,12 @@ from sklearn.manifold import TSNE
 
 def pca_proj(embeddings, labels, seed=42):
     proj = PCA(n_components=2, random_state=seed).fit_transform(embeddings)
-    sns.scatterplot(x=proj[:, 0], y=proj[:, 1], hue=labels).set(title="PCA")
+    sns.scatterplot(
+        x=proj[:, 0],
+        y=proj[:, 1],
+        hue=labels,
+        palette=sns.color_palette("tab10"),
+    ).set(title="PCA")
     plt.show()
 
 

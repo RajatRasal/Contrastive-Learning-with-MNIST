@@ -13,14 +13,12 @@ class MNISTClassifier(pl.LightningModule):
         self.save_hyperparameters()
 
         # Neural Networks
-        self.classifier = nn.Sequential(
-            MNISTConvEncoder(
-                activ_type=self.hparams.activ_type,
-                pool_type=self.hparams.pool_type,
-            ),
-            LinearHead(MNISTConvEncoder.backbone_output_size, 10),
-            nn.LogSoftmax(dim=1),
+        self.encoder = MNISTConvEncoder(
+            activ_type=self.hparams.activ_type,
+            pool_type=self.hparams.pool_type,
         )
+        self.head = LinearHead(MNISTConvEncoder.backbone_output_size, 10)
+        self.output = nn.LogSoftmax(dim=1)
 
         # Metrics
         self.train_loss = torchmetrics.MeanMetric()
@@ -30,12 +28,15 @@ class MNISTClassifier(pl.LightningModule):
         self.test_loss = torchmetrics.MeanMetric()
         self.test_acc = torchmetrics.Accuracy()
 
+    def __classifier(self, x):
+        return self.output(self.head(self.encoder(x)))
+
     def forward(self, x):
-        return torch.argmax(self.classifier(x), dim=1)
+        return torch.argmax(self.__classifier(x), dim=1)
 
     def __loss_from_batch(self, batch):
         x, y = batch
-        pred = self.classifier(x)
+        pred = self.__classifier(x)
         return torch.argmax(torch.exp(pred), dim=1), F.nll_loss(pred, y)
 
     def __step(self, batch, loss_agg, acc_agg):

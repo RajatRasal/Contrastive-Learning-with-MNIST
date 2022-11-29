@@ -10,11 +10,14 @@ from contrastive import MNISTSupContrast
 from data import get_datamodule
 
 
-def get_trainer(max_epochs: int, val_check_freq: int, callbacks=None):
+def get_trainer(
+    max_epochs: int, val_check_freq: int, callbacks=None, logger=True
+):
     return pl.Trainer(
         max_epochs=max_epochs,
         check_val_every_n_epoch=val_check_freq,
         callbacks=callbacks,
+        logger=logger,
     )
 
 
