@@ -48,7 +48,7 @@ class ConvUnit(nn.Module):
 class MNISTConvEncoder(nn.Module):
     backbone_output_size = 196
 
-    def __init__(self, activ_type, pool_type):
+    def __init__(self, activ_type: str, pool_type: str):
         super().__init__()
 
         self.conv_unit1 = ConvUnit(

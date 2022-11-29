@@ -4,18 +4,21 @@ import torch.nn.functional as F
 import torchmetrics
 from torch import nn, optim
 
+from components import LinearHead, MNISTConvEncoder
+
 
 class MNISTClassifier(pl.LightningModule):
-    def __init__(self, encoder: nn.Module, cls_head: nn.Module, lr: float):
+    def __init__(self, activ_type: str, pool_type: str, lr: float):
         super().__init__()
-
-        # Hyperparameters
-        self.lr = lr
+        self.save_hyperparameters()
 
         # Neural Networks
         self.classifier = nn.Sequential(
-            encoder,
-            cls_head,
+            MNISTConvEncoder(
+                activ_type=self.hparams.activ_type,
+                pool_type=self.hparams.pool_type,
+            ),
+            LinearHead(MNISTConvEncoder.backbone_output_size, 10),
             nn.LogSoftmax(dim=1),
         )
 
@@ -66,4 +69,4 @@ class MNISTClassifier(pl.LightningModule):
         self.__epoch_end("Test", self.test_loss, self.test_acc)
 
     def configure_optimizers(self):
-        return optim.Adam(self.parameters(), lr=self.lr)
+        return optim.Adam(self.parameters(), lr=self.hparams.lr)
