@@ -1,6 +1,5 @@
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
 import torchmetrics
 from torch import nn, optim
 
@@ -19,6 +18,7 @@ class MNISTClassifier(pl.LightningModule):
         )
         self.head = LinearHead(MNISTConvEncoder.backbone_output_size, 10)
         self.output = nn.LogSoftmax(dim=1)
+        self.loss = nn.NLLLoss()
 
         # Metrics
         self.train_loss = torchmetrics.MeanMetric()
@@ -37,7 +37,7 @@ class MNISTClassifier(pl.LightningModule):
     def __loss_from_batch(self, batch):
         x, y = batch
         pred = self.__classifier(x)
-        return torch.argmax(torch.exp(pred), dim=1), F.nll_loss(pred, y)
+        return torch.argmax(torch.exp(pred), dim=1), self.loss(pred, y)
 
     def __step(self, batch, loss_agg, acc_agg):
         pred, loss = self.__loss_from_batch(batch)

@@ -5,7 +5,6 @@ from lightning_lite.utilities.seed import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 from classify import MNISTClassifier
-from components import LinearHead, MNISTConvEncoder
 from contrastive import MNISTSupContrast
 from data import get_datamodule
 
@@ -62,19 +61,19 @@ if __name__ == "__main__":
             args.seed,
         )
     else:
-        seed_everything(args.seed)
-
-        dm = get_datamodule(256)
-        encoder = MNISTConvEncoder()
-        sup_con_head = LinearHead(MNISTConvEncoder.backbone_output_size, 256)
-        model = MNISTSupContrast(encoder, sup_con_head, lr=5e-3)
-        get_trainer(max_epochs=10, val_check_freq=5).fit(model, datamodule=dm)
-
-        dm = get_datamodule(256)
-        cls_head = LinearHead(MNISTConvEncoder.backbone_output_size, 10)
-        model = MNISTClassifier(
-            encoder.requires_grad_(False), cls_head, lr=1e-3
+        trainer = get_trainer(
+            max_epochs=args.epochs,
+            val_check_freq=args.val_check_freq,
+            callbacks=[
+                ModelCheckpoint(
+                    save_last=True,
+                    monitor="Validation Loss",
+                    filename="epoch={epoch:02d}-loss={Validation Loss:.5f}",
+                ),
+            ],
         )
-        trainer = get_trainer(max_epochs=10, val_check_freq=5)
+
+        seed_everything(args.seed)
+        dm = get_datamodule(args.batch_size)
+        model = MNISTSupContrast(args.activation, args.pooling, 256, args.lr)
         trainer.fit(model, datamodule=dm)
-        trainer.test(model, datamodule=dm)

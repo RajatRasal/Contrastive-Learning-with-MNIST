@@ -2,7 +2,8 @@ import os
 
 import torch
 
-from classify import MNISTClassifier
+# from classify import MNISTClassifier
+from contrastive import MNISTSupContrast
 from data import get_datamodule
 from plot import pca_proj
 from train import get_trainer
@@ -10,8 +11,10 @@ from train import get_trainer
 if __name__ == "__main__":
     dm = get_datamodule(256)
 
-    path = "/Users/work/Documents/contrastive_learning_mnist/lightning_logs/version_101"  # noqa: E501
-    model = MNISTClassifier.load_from_checkpoint(
+    # path = "/Users/work/Documents/contrastive_learning_mnist/lightning_logs/version_101"  # noqa: E501
+    path = "/Users/work/Documents/contrastive_learning_mnist/lightning_logs/version_102"  # noqa: E501
+    # model = MNISTClassifier.load_from_checkpoint(
+    model = MNISTSupContrast.load_from_checkpoint(
         os.path.join(path, "checkpoints", "last.ckpt")
     )
 
