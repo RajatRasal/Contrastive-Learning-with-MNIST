@@ -17,5 +17,10 @@ def pca_proj(embeddings, labels, seed=42):
 
 def tsne_proj(embeddings, labels, seed=42):
     proj = TSNE(n_components=2, random_state=seed).fit_transform(embeddings)
-    sns.scatterplot(x=proj[:, 0], y=proj[:, 1], hue=labels).set(title="T-SNE")
+    sns.scatterplot(
+        x=proj[:, 0],
+        y=proj[:, 1],
+        hue=labels,
+        palette=sns.color_palette("tab10"),
+    ).set(title="T-SNE")
     plt.show()

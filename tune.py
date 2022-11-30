@@ -1,12 +1,13 @@
 import logging
 from typing import Dict, List, Optional, Union
 
+import numpy as np
 from pytorch_lightning import Callback, LightningModule, Trainer
 from ray import air, tune
 from ray.tune import CLIReporter
 
 from components import _ACTIVATIONS, _POOLING
-from train import get_trainer, train_mnist_classifier
+from train import get_trainer, train_mnist_classifier, train_mnist_contrastive
 
 logger = logging.getLogger(__name__)
 
@@ -69,27 +70,44 @@ def _train_mnist_classifier(config):
     train_mnist_classifier(trainer, **config)
 
 
-def tune_mnist_classifier():
-    max_epochs = 20
+def _train_mnist_contrastive(config):
+    trainer = get_trainer(
+        max_epochs=config["max_epochs"],
+        val_check_freq=config["val_check_freq"],
+        callbacks=[
+            TuneReportCallbackOnValidationEnd(
+                metrics={
+                    "val_loss": "Validation Loss",
+                    "train_loss": "Training Loss",
+                },
+            ),
+        ],
+    )
+    del config["max_epochs"]
+    del config["val_check_freq"]
+    train_mnist_contrastive(trainer, **config)
+
+
+def tune_mnist_classifier(classify: bool = True, max_epochs: int = 40):
     config = {
         "activation": tune.grid_search(list(_ACTIVATIONS.keys())),
         "pooling": tune.grid_search(list(_POOLING.keys())),
-        "batch_size": 256,
-        "lr": tune.grid_search([0.01, 0.03, 0.05, 0.07, 0.09]),
+        "batch_size": tune.grid_search([1024, 2048]),
+        "lr": tune.grid_search(np.array([0.01, 0.001, 0.0001])),
         "max_epochs": max_epochs,
         "val_check_freq": min(5, max_epochs),
         "seed": 1234,
     }
 
     reporter = CLIReporter(
-        parameter_columns=["activation", "pooling", "lr"],
-        metric_columns=["val_acc", "train_acc"],
+        parameter_columns=["activation", "pooling", "lr", "batch_size"],
+        metric_columns=["val_acc", "train_acc", "val_loss"],
     )
 
     tuner = tune.Tuner(
-        _train_mnist_classifier,
+        _train_mnist_classifier if classify else _train_mnist_contrastive,
         tune_config=tune.TuneConfig(
-            metric="val_acc",
+            metric="val_acc" if classify else "val_loss",
             mode="max",
             num_samples=1,
             max_concurrent_trials=3,
@@ -106,4 +124,4 @@ def tune_mnist_classifier():
 
 
 if __name__ == "__main__":
-    tune_mnist_classifier()
+    tune_mnist_classifier(False, 20)

@@ -27,6 +27,13 @@ def train_mnist_classifier(trainer, batch_size, lr, pooling, activation, seed):
     trainer.fit(model, datamodule=dm)
 
 
+def train_mnist_contrastive(trainer, batch_size, lr, pooling, activ, seed):
+    seed_everything(seed)
+    dm = get_datamodule(batch_size)
+    model = MNISTSupContrast(activ, pooling, batch_size, lr)
+    trainer.fit(model, datamodule=dm)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-pt", "--pretrain", action="store_true")
@@ -72,8 +79,11 @@ if __name__ == "__main__":
                 ),
             ],
         )
-
-        seed_everything(args.seed)
-        dm = get_datamodule(args.batch_size)
-        model = MNISTSupContrast(args.activation, args.pooling, 256, args.lr)
-        trainer.fit(model, datamodule=dm)
+        train_mnist_contrastive(
+            trainer,
+            args.batch_size,
+            args.lr,
+            args.pooling,
+            args.activation,
+            args.seed,
+        )
