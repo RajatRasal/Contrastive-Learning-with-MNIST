@@ -27,10 +27,31 @@ def train_mnist_classifier(trainer, batch_size, lr, pooling, activation, seed):
     trainer.fit(model, datamodule=dm)
 
 
-def train_mnist_contrastive(trainer, batch_size, lr, pooling, activ, seed):
+def train_mnist_contrastive(
+    trainer,
+    batch_size,
+    embedding,
+    lr,
+    pooling,
+    activ,
+    seed,
+    pos_margin: float = 0.25,
+    neg_margin: float = 1.5,
+    preprocess: bool = False,
+    dropout: float = 0.5,
+):
     seed_everything(seed)
     dm = get_datamodule(batch_size)
-    model = MNISTSupContrast(activ, pooling, batch_size, lr)
+    model = MNISTSupContrast(
+        activ,
+        pooling,
+        embedding,
+        lr,
+        pos_margin,
+        neg_margin,
+        preprocess,
+        dropout,
+    )
     trainer.fit(model, datamodule=dm)
 
 
@@ -41,9 +62,14 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--activation", type=str, default="relu")
     parser.add_argument("-p", "--pooling", type=str, default="max")
     parser.add_argument("-b", "--batch-size", type=int, default=256)
+    parser.add_argument("-d", "--embedding", type=int, default=256)
     parser.add_argument("-l", "--lr", type=float, default=0.07)
     parser.add_argument("-e", "--epochs", type=int, default=20)
     parser.add_argument("-v", "--val-check-freq", type=int, default=5)
+    parser.add_argument("-pm", "--pos-margin", type=float, default=1.5)
+    parser.add_argument("-nm", "--neg-margin", type=float, default=0.5)
+    parser.add_argument("-pr", "--preprocess", action="store_true")
+    parser.add_argument("-dr", "--dropout", type=float, default=0)
     parser.add_argument("-s", "--seed", type=int, default=1234)
     args = parser.parse_args()
 
@@ -82,8 +108,13 @@ if __name__ == "__main__":
         train_mnist_contrastive(
             trainer,
             args.batch_size,
+            args.embedding,
             args.lr,
             args.pooling,
             args.activation,
             args.seed,
+            args.pos_margin,
+            args.neg_margin,
+            args.preprocess,
+            args.dropout,
         )

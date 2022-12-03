@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from torch import nn
 
 _ACTIVATIONS = {
@@ -82,9 +83,13 @@ class MNISTConvEncoder(nn.Module):
 
 
 class LinearHead(nn.Module):
-    def __init__(self, input_dim: int, output_dim: int):
+    def __init__(self, input_dim: int, output_dim: int, dropout: float = 0):
         super().__init__()
+        self.dropout = dropout
         self.head = nn.Linear(input_dim, output_dim)
 
     def forward(self, x: torch.Tensor):
-        return self.head(x)
+        out = self.head(x)
+        if self.dropout:
+            out = F.dropout(out, p=self.dropout)
+        return out

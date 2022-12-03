@@ -17,7 +17,8 @@ if __name__ == "__main__":
     dm = get_datamodule(256)
 
     if args.contrastive:
-        path = "/Users/work/Documents/contrastive_learning_mnist/lightning_logs/version_105"  # noqa: E501
+        # path = "/Users/work/Documents/contrastive_learning_mnist/lightning_logs/version_105"  # noqa: E501
+        path = "/Users/work/Documents/contrastive_learning_mnist/lightning_logs/version_113"  # noqa: E501
         model = MNISTSupContrast.load_from_checkpoint(
             os.path.join(path, "checkpoints", "last.ckpt")
         )

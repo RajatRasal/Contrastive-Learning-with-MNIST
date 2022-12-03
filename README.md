@@ -1,3 +1,4 @@
+`conda activate contrastive_learning_mnist`
 `conda env update -f environment.yml`
 
 `tensorboard --logdir lightning_logs`
@@ -64,6 +65,22 @@ Small learning rates.
 | _train_mnist_contrastive_491a6_00022 | TERMINATED | 127.0.0.1:30964 | relu         | avg       | 0.0001 |         2048 |   0.686366 |
 | _train_mnist_contrastive_491a6_00023 | TERMINATED | 127.0.0.1:31399 | gelu         | avg       | 0.0001 |         2048 |   0.687941 |
 
+
++--------------------------------------+------------+-----------------+--------------+--------------+-------------+--------------+------------+
+| Trial name                           | status     | loc             |   neg_margin |   pos_margin |   embedding |   train_loss |   val_loss |
+|--------------------------------------+------------+-----------------+--------------+--------------+-------------+--------------+------------|
+| _train_mnist_contrastive_a8d14_00000 | TERMINATED | 127.0.0.1:54772 |         0.25 |          1   |         256 |   0.00149231 | 0.00449065 |
+| _train_mnist_contrastive_a8d14_00001 | TERMINATED | 127.0.0.1:55949 |         0.5  |          1   |         256 |   0.0228083  | 0.0325808  |
+| _train_mnist_contrastive_a8d14_00002 | TERMINATED | 127.0.0.1:57140 |         0.25 |          1.5 |         256 |   0          | 0          |
+| _train_mnist_contrastive_a8d14_00003 | TERMINATED | 127.0.0.1:58260 |         0.5  |          1.5 |         256 |   0.00397437 | 0.0122953  |
+
+
+TODO: Include a KNN classifier in the test and validation 
+TODO: Transformations for MNIST for contrastive - 30 degree rotation, shift 0.25 of the height and width, shear up to 45, zoom in range 0.5 to 1.5
+
+`python3 train.py -p avg -a gelu -l 0.01 --batch-size 2048 --pretrain --embedding 256 --pos-margin 1.5 --neg-margin 0`
+
+- Common confusion between 3 and 8, 4 and 9. How can we improve this? - dropout?
 
 
 ### Useful Links

@@ -1,3 +1,4 @@
+import kornia
 import pytorch_lightning as pl
 import torch
 import torchmetrics
@@ -15,9 +16,19 @@ class MNISTSupContrast(pl.LightningModule):
         lr: float,
         pos_margin: float = 0.25,
         neg_margin: float = 1.5,
+        preprocess: bool = False,
+        dropout: float = 0,
     ):
         super().__init__()
         self.save_hyperparameters()
+
+        # Preprocessing
+        self.preprocessing = kornia.augmentation.RandomAffine(
+            degrees=30,
+            translate=0.25,
+            scale=[0.5, 1.5],
+            shear=45,
+        )
 
         # Neural Networks
         self.encoder = MNISTConvEncoder(
@@ -27,6 +38,7 @@ class MNISTSupContrast(pl.LightningModule):
         self.head = LinearHead(
             MNISTConvEncoder.backbone_output_size,
             self.hparams.head_output,
+            self.hparams.dropout,
         )
         self.loss = losses.ContrastiveLoss(
             pos_margin=self.hparams.pos_margin,
@@ -43,6 +55,8 @@ class MNISTSupContrast(pl.LightningModule):
 
     def __step(self, batch, loss_agg):
         x, y = batch
+        if self.hparams.preprocess:
+            x = self.preprocessing(x)
         embeddings = self.forward(x)
         loss = self.loss(embeddings, y)
         loss_agg.update(loss)

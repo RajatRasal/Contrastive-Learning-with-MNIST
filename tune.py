@@ -88,12 +88,12 @@ def _train_mnist_contrastive(config):
     train_mnist_contrastive(trainer, **config)
 
 
-def tune_mnist_classifier(classify: bool = True, max_epochs: int = 40):
+def tune_mnist_classifier(max_epochs: int = 40):
     config = {
         "activation": tune.grid_search(list(_ACTIVATIONS.keys())),
         "pooling": tune.grid_search(list(_POOLING.keys())),
-        "batch_size": tune.grid_search([1024, 2048]),
-        "lr": tune.grid_search(np.array([0.01, 0.001, 0.0001])),
+        "batch_size": tune.grid_search([256, 1024, 2048]),
+        "lr": tune.grid_search(np.array([0.01, 0.03, 0.05, 0.07, 0.09])),
         "max_epochs": max_epochs,
         "val_check_freq": min(5, max_epochs),
         "seed": 1234,
@@ -101,13 +101,13 @@ def tune_mnist_classifier(classify: bool = True, max_epochs: int = 40):
 
     reporter = CLIReporter(
         parameter_columns=["activation", "pooling", "lr", "batch_size"],
-        metric_columns=["val_acc", "train_acc", "val_loss"],
+        metric_columns=["val_acc", "train_acc"],
     )
 
     tuner = tune.Tuner(
-        _train_mnist_classifier if classify else _train_mnist_contrastive,
+        _train_mnist_classifier,
         tune_config=tune.TuneConfig(
-            metric="val_acc" if classify else "val_loss",
+            metric="val_acc",
             mode="max",
             num_samples=1,
             max_concurrent_trials=3,
@@ -123,5 +123,44 @@ def tune_mnist_classifier(classify: bool = True, max_epochs: int = 40):
     print(results.get_best_result())
 
 
+def tune_mnist_contrastive(max_epochs: int = 20):
+    config = {
+        "activ": tune.grid_search(["gelu"]),
+        "pooling": tune.grid_search(["avg"]),
+        "batch_size": tune.grid_search([2048]),
+        "lr": tune.grid_search(np.array([0.01])),
+        "embedding": tune.grid_search([256]),
+        "max_epochs": max_epochs,
+        "val_check_freq": min(5, max_epochs),
+        "seed": 1234,
+        "pos_margin": tune.grid_search([1, 1.5]),
+        "neg_margin": tune.grid_search([0.25, 0.5]),
+    }
+
+    reporter = CLIReporter(
+        parameter_columns=["neg_margin", "pos_margin", "embedding"],
+        metric_columns=["train_loss", "val_loss"],
+    )
+
+    tuner = tune.Tuner(
+        _train_mnist_contrastive,
+        tune_config=tune.TuneConfig(
+            metric="val_loss",
+            mode="max",
+            num_samples=1,
+            max_concurrent_trials=1,
+        ),
+        run_config=air.RunConfig(
+            name="tune_mnist_cls",
+            local_dir="./ray_logs",
+            progress_reporter=reporter,
+        ),
+        param_space=config,
+    )
+    results = tuner.fit()
+    print(results.get_best_result())
+
+
 if __name__ == "__main__":
-    tune_mnist_classifier(False, 20)
+    # tune_mnist_classifier(False, 20)
+    tune_mnist_contrastive(20)
