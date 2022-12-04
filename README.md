@@ -8,6 +8,7 @@
 ```
 1. `conda env update -f environment.yml`
 1. `conda activate contrastive_learning_mnist`
+1. `pre-commit install`
 1. `poetry install`
 
 ## Results
@@ -44,9 +45,8 @@ ReLU better than GeLU when everything else is fixed - small batch sizes.
 For larger batch sizes, GeLU is better.
 Small learning rates.
 
-+--------------+-----------+--------+--------------+------------+
 | activation   | pooling   |     lr |   batch_size |   val_loss |
-+--------------+-----------+--------+--------------+------------|
+|--------------|-----------|--------|--------------|------------|
 | relu         | max       | 0.01   |         1024 |   0.558239 |
 | gelu         | max       | 0.01   |         1024 |   0.540568 |
 | relu         | max       | 0.01   |         2048 |   0.528964 |
@@ -73,9 +73,8 @@ Small learning rates.
 | gelu         | avg       | 0.0001 |         2048 |   0.687941 |
 
 
-+--------------+--------------+-------------+--------------+------------+
 |   neg_margin |   pos_margin |   embedding |   train_loss |   val_loss |
-+--------------+--------------+-------------+--------------+------------|
+|--------------|--------------|-------------|--------------|------------|
 |         0.25 |          1   |         256 |   0.00149231 | 0.00449065 |
 |         0.5  |          1   |         256 |   0.0228083  | 0.0325808  |
 |         0.25 |          1.5 |         256 |   0          | 0          |
