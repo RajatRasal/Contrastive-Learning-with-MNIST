@@ -1,14 +1,16 @@
-`conda activate contrastive_learning_mnist`
-`conda env update -f environment.yml`
-`tensorboard --logdir lightning_logs`
-
 ## Setup
 
-``
-`git clone https://github.com/RajatRasal/Contrastive-Learning-with-MNIST.git`
-`conda activate contrastive_learning_mnist`
-`poetry install`
+1. Add the following to the local `.git/config`:
+```
+[user]
+    name = Rajat Rasal
+    email = yugiohrajat1@gmail.com
+```
+1. `conda env update -f environment.yml`
+1. `conda activate contrastive_learning_mnist`
+1. `poetry install`
 
+## Results
 #### Without pretraining
 Fixed hyperparameters:
 - batch size = 256
@@ -89,7 +91,7 @@ TODO: Transformations for MNIST for contrastive - 30 degree rotation, shift 0.25
 - Longer training - the confusion between 4 and 8 still present
 - Bigger embeddings dim - possibly... 512
 
-### Useful Links
+## Useful Links
 - https://ealizadeh.com/blog/guide-to-python-env-pkg-dependency-using-conda-poetry/
 - https://docs.ray.io/en/latest/tune/examples/tune-pytorch-lightning.html#tune-pytorch-lightning-ref
 - https://stackoverflow.com/questions/60517190/are-poetry-lock-files-os-independent
