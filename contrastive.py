@@ -24,7 +24,8 @@ class MNISTSupContrast(pl.LightningModule):
 
         # Preprocessing
         self.preprocessing = kornia.augmentation.RandomAffine(
-            degrees=30,
+            # degrees=0,
+            degrees=(-40, 40),
             translate=0.25,
             scale=[0.5, 1.5],
             shear=45,
@@ -53,9 +54,9 @@ class MNISTSupContrast(pl.LightningModule):
         self.test_loss = torchmetrics.MeanMetric()
         # self.test_acc = torchmetrics.Accuracy()
 
-    def __step(self, batch, loss_agg):
+    def __step(self, batch, loss_agg, test=False):
         x, y = batch
-        if self.hparams.preprocess:
+        if self.hparams.preprocess and not test:
             x = self.preprocessing(x)
         embeddings = self.forward(x)
         loss = self.loss(embeddings, y)
@@ -82,7 +83,7 @@ class MNISTSupContrast(pl.LightningModule):
         self.__epoch_end("Validation", self.valid_loss)
 
     def test_step(self, batch, batch_idx):
-        return self.__step(batch, self.test_loss)
+        return self.__step(batch, self.test_loss, test=True)
 
     def test_epoch_end(self, outputs):
         self.__epoch_end("Test", self.test_loss)
