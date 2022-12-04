@@ -4,7 +4,7 @@ import torch
 import torchmetrics
 from pytorch_metric_learning import losses
 
-from components import LinearHead, MNISTConvEncoder
+from .components import LinearHead, MNISTConvEncoder
 
 
 class MNISTSupContrast(pl.LightningModule):

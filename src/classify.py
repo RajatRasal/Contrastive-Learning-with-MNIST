@@ -3,7 +3,7 @@ import torch
 import torchmetrics
 from torch import nn, optim
 
-from components import LinearHead, MNISTConvEncoder
+from .components import LinearHead, MNISTConvEncoder
 
 
 class MNISTClassifier(pl.LightningModule):

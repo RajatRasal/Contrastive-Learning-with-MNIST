@@ -84,7 +84,7 @@ Small learning rates.
 TODO: Include a KNN classifier in the test and validation 
 TODO: Transformations for MNIST for contrastive - 30 degree rotation, shift 0.25 of the height and width, shear up to 45, zoom in range 0.5 to 1.5
 
-`python3 train.py -p avg -a gelu -l 0.01 --batch-size 2048 --pretrain --embedding 256 --pos-margin 1.5 --neg-margin 0 --preprocess`
+`python3 -m src.train -p avg -a gelu -l 0.01 --batch-size 2048 --pretrain --embedding 256 --pos-margin 1.5 --neg-margin 0 --preprocess`
 
 - Common confusion between 4 and 9. How can we improve this? - dropout? - NO causes more confusion
 - Longer training - the confusion between 4 and 8 still present

@@ -4,9 +4,9 @@ import pytorch_lightning as pl
 from lightning_lite.utilities.seed import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-from classify import MNISTClassifier
-from contrastive import MNISTSupContrast
-from data import get_datamodule
+from .classify import MNISTClassifier
+from .contrastive import MNISTSupContrast
+from .data import get_datamodule
 
 
 def get_trainer(
