@@ -27,3 +27,19 @@ repos:
     hooks:
     - id: isort
       args: ["--profile", "black", "--filter-files"]
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.3.0
+    hooks:
+    -   id: pyupgrade
+
+  - repo: https://github.com/hadialqattan/pycln
+    rev: v2.1.2
+    hooks:
+      - id: pycln
+        args: [--all]
+
+  - repo: https://github.com/pre-commit/pre-commit
+    rev: v2.20.0
+    hooks:
+      - id: validate_manifest

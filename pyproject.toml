@@ -11,6 +11,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "3.9.*"
+pre-commit = "^2.20"
 numpy = "1.23.5"
 torch = "1.12.1"
 torchvision = "0.13.1"
