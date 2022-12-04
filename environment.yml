@@ -1,0 +1,16 @@
+name: contrastive_learning_mnist
+dependencies:
+  - python=3.9
+  - pip
+  - pip:
+    - torch==1.12.1
+    - torchvision==0.13.1
+    - pytorch_lightning==1.8.3.post0
+    - lightning-bolts==0.6.0.post1
+    - torchmetrics==0.10.3
+    - pytorch-metric-learning==1.6.3
+    - tensorboard
+    - pandas==1.5.2
+    - ray[default]==2.1.0
+    - ray[air]==2.1.0
+    - ray[tune]==2.1.0
