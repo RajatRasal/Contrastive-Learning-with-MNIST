@@ -90,6 +90,12 @@ TODO: Transformations for MNIST for contrastive - 30 degree rotation, shift 0.25
 - Longer training - the confusion between 4 and 8 still present
 - Bigger embeddings dim - possibly... 512
 
+- Using STN, we can separate 4 and 9 but we then get confused between 3, 5 and 8.
+- Increasing intermediate from 32 to 50 improve disentanglement.
+
+- At this point we might need to try some learning rate decay. The components in the NN pipeline seem to be able to separate the classes, but we are not learning the network in the most appropriate way.
+`python3 -m src.train --epoch 40 -p avg -a gelu -l 0.005 --batch-size 2048 --pretrain --embedding 256 --pos-margin 2 --neg-margin 0 --preprocess --stn`
+
 ## Useful Links
 - https://ealizadeh.com/blog/guide-to-python-env-pkg-dependency-using-conda-poetry/
 - https://docs.ray.io/en/latest/tune/examples/tune-pytorch-lightning.html#tune-pytorch-lightning-ref

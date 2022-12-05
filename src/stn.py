@@ -22,8 +22,11 @@ class MNISTSpatialTransformer(nn.Module):
         )
 
         # Regressor for the 3 * 2 affine matrix
+        _intermediate = 16
         self.fc_loc = nn.Sequential(
-            nn.Linear(10 * 3 * 3, 32), nn.ReLU(True), nn.Linear(32, 3 * 2)
+            nn.Linear(10 * 3 * 3, _intermediate),
+            nn.ReLU(True),
+            nn.Linear(_intermediate, 3 * 2),
         )
 
         # Initialize the weights/bias with identity transformation
