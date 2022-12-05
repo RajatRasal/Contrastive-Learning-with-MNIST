@@ -5,6 +5,7 @@ import torchmetrics
 from pytorch_metric_learning import losses
 
 from .components import LinearHead, MNISTConvEncoder
+from .stn import MNISTSpatialTransformer
 
 
 class MNISTSupContrast(pl.LightningModule):
@@ -18,24 +19,30 @@ class MNISTSupContrast(pl.LightningModule):
         neg_margin: float = 1.5,
         preprocess: bool = False,
         dropout: float = 0,
+        stn: bool = False,
     ):
         super().__init__()
         self.save_hyperparameters()
 
         # Preprocessing
-        self.preprocessing = kornia.augmentation.RandomAffine(
-            # degrees=0,
-            degrees=(-40, 40),
-            translate=0.25,
-            scale=[0.5, 1.5],
-            shear=45,
-        )
+        if self.hparams.preprocess:
+            self.preprocessing = kornia.augmentation.RandomAffine(
+                degrees=(-40, 40),
+                translate=0.25,
+                scale=[0.5, 1.5],
+                shear=45,
+            )
+
+        # STN
+        if self.hparams.stn:
+            self.stn = MNISTSpatialTransformer()
 
         # Neural Networks
         self.encoder = MNISTConvEncoder(
             activ_type=self.hparams.activ_type,
             pool_type=self.hparams.pool_type,
         )
+        # TODO: Turn off dropout for testing
         self.head = LinearHead(
             MNISTConvEncoder.backbone_output_size,
             self.hparams.head_output,
@@ -48,16 +55,16 @@ class MNISTSupContrast(pl.LightningModule):
 
         # Metrics
         self.train_loss = torchmetrics.MeanMetric()
-        # self.train_acc = torchmetrics.Accuracy()
         self.valid_loss = torchmetrics.MeanMetric()
-        # self.valid_acc = torchmetrics.Accuracy()
         self.test_loss = torchmetrics.MeanMetric()
-        # self.test_acc = torchmetrics.Accuracy()
 
     def __step(self, batch, loss_agg, test=False):
         x, y = batch
+        # TODO: Check if there is a self.testing variable?
         if self.hparams.preprocess and not test:
             x = self.preprocessing(x)
+        if self.hparams.stn:
+            x = self.stn(x)
         embeddings = self.forward(x)
         loss = self.loss(embeddings, y)
         loss_agg.update(loss)

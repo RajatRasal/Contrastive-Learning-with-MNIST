@@ -39,6 +39,7 @@ def train_mnist_contrastive(
     neg_margin: float = 1.5,
     preprocess: bool = False,
     dropout: float = 0.5,
+    stn: bool = False,
 ):
     seed_everything(seed)
     dm = get_datamodule(batch_size)
@@ -51,6 +52,7 @@ def train_mnist_contrastive(
         neg_margin,
         preprocess,
         dropout,
+        stn,
     )
     trainer.fit(model, datamodule=dm)
 
@@ -70,6 +72,7 @@ if __name__ == "__main__":
     parser.add_argument("-nm", "--neg-margin", type=float, default=0.5)
     parser.add_argument("-pr", "--preprocess", action="store_true")
     parser.add_argument("-dr", "--dropout", type=float, default=0)
+    parser.add_argument("-st", "--stn", action="store_true")
     parser.add_argument("-s", "--seed", type=int, default=1234)
     args = parser.parse_args()
 
@@ -117,4 +120,5 @@ if __name__ == "__main__":
             args.neg_margin,
             args.preprocess,
             args.dropout,
+            args.stn,
         )

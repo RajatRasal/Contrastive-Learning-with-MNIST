@@ -3,27 +3,28 @@ import os
 
 import torch
 
-from classify import MNISTClassifier
-from contrastive import MNISTSupContrast
-from data import get_datamodule
-from plot import pca_proj, tsne_proj
-from train import get_trainer
+from .classify import MNISTClassifier
+from .contrastive import MNISTSupContrast
+from .data import get_datamodule
+from .plot import pca_proj, tsne_proj
+from .train import get_trainer
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--contrastive", action="store_true")
+    parser.add_argument("-d", "--logdir", default="./lightning_logs", type=str)
+    parser.add_argument("-v", "--version", default=0, type=int)
     args = parser.parse_args()
+
+    path = os.path.join(args.logdir, f"version_{args.version}")
 
     dm = get_datamodule(256)
 
     if args.contrastive:
-        # path = "/Users/work/Documents/contrastive_learning_mnist/lightning_logs/version_105"  # noqa: E501
-        path = "/Users/work/Documents/contrastive_learning_mnist/lightning_logs/version_113"  # noqa: E501
         model = MNISTSupContrast.load_from_checkpoint(
             os.path.join(path, "checkpoints", "last.ckpt")
         )
     else:
-        path = "/Users/work/Documents/contrastive_learning_mnist/lightning_logs/version_101"  # noqa: E501
         model = MNISTClassifier.load_from_checkpoint(
             os.path.join(path, "checkpoints", "last.ckpt")
         )
@@ -40,5 +41,5 @@ if __name__ == "__main__":
     embeddings = torch.cat(embeddings, dim=0)
     labels = torch.cat(labels)
 
-    pca_proj(embeddings, labels)
-    tsne_proj(embeddings, labels)
+    pca_proj(embeddings, labels, path)
+    tsne_proj(embeddings, labels, path)
