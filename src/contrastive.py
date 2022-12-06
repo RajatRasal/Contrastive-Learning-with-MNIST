@@ -1,13 +1,18 @@
+from typing import Literal, Union
+
 import kornia
 import pytorch_lightning as pl
 import torch
 import torchmetrics
+import torchvision.transforms as T
 from pytorch_metric_learning import losses
 
 from .components import LinearHead, MNISTConvEncoder
 from .stn import MNISTSpatialTransformer
 
 
+# TODO: Set Literal params as the same as the choices for preprocess in
+# argparse in train.py.
 class MNISTSupContrast(pl.LightningModule):
     def __init__(
         self,
@@ -17,25 +22,33 @@ class MNISTSupContrast(pl.LightningModule):
         lr: float,
         pos_margin: float = 0.25,
         neg_margin: float = 1.5,
-        preprocess: bool = False,
+        preprocess: Union[None, Literal["RandAffine", "RandAug"]] = None,
         dropout: float = 0,
         stn: bool = False,
+        stn_latent_dim: int = 32,
     ):
         super().__init__()
         self.save_hyperparameters()
 
         # Preprocessing
-        if self.hparams.preprocess:
+        if self.hparams.preprocess == "RandAffine":
             self.preprocessing = kornia.augmentation.RandomAffine(
                 degrees=(-40, 40),
                 translate=0.25,
                 scale=[0.5, 1.5],
                 shear=45,
             )
+        elif self.hparams.preprocess == "RandAug":
+            # TODO: This only works for uint8 - fix it!
+            self.preprocessing = T.RandAugment()
+        elif self.hparams.preprocess is None:
+            pass
+        else:
+            raise Exception("Invalid preprocessing option")
 
         # STN
         if self.hparams.stn:
-            self.stn = MNISTSpatialTransformer()
+            self.stn = MNISTSpatialTransformer(self.hparams.stn_latent_dim)
 
         # Neural Networks
         self.encoder = MNISTConvEncoder(
@@ -61,7 +74,7 @@ class MNISTSupContrast(pl.LightningModule):
     def __step(self, batch, loss_agg, test=False):
         x, y = batch
         # TODO: Check if there is a self.testing variable?
-        if self.hparams.preprocess and not test:
+        if self.hparams.preprocess is not None and not test:
             x = self.preprocessing(x)
         if self.hparams.stn:
             x = self.stn(x)
@@ -81,19 +94,19 @@ class MNISTSupContrast(pl.LightningModule):
         return self.__step(batch, self.train_loss)
 
     def training_epoch_end(self, outputs):
-        self.__epoch_end("Training", self.train_loss)
+        self.__epoch_end("Training", self.train_loss, True)
 
     def validation_step(self, batch, batch_idx):
         return self.__step(batch, self.valid_loss)
 
     def validation_epoch_end(self, outputs):
-        self.__epoch_end("Validation", self.valid_loss)
+        self.__epoch_end("Validation", self.valid_loss, True)
 
     def test_step(self, batch, batch_idx):
-        return self.__step(batch, self.test_loss, test=True)
+        return self.__step(batch, self.test_loss)
 
     def test_epoch_end(self, outputs):
-        self.__epoch_end("Test", self.test_loss)
+        self.__epoch_end("Test", self.test_loss, True)
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.lr)

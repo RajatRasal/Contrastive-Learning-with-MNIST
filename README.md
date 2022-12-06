@@ -12,7 +12,7 @@
 1. `poetry install`
 
 ## Results
-#### Without pretraining
+#### Classification
 Fixed hyperparameters:
 - batch size = 256
 - epochs = 20
@@ -40,7 +40,7 @@ Fixed hyperparameters:
 | relu         | avg       | 0.09 |  0.973583 |    0.976896 |
 | gelu         | avg       | 0.09 |  0.977583 |    0.978625 |
 
-#### Pretraining
+#### Contrastive
 ReLU better than GeLU when everything else is fixed - small batch sizes.
 For larger batch sizes, GeLU is better.
 Small learning rates.
@@ -82,7 +82,6 @@ Small learning rates.
 
 
 TODO: Include a KNN classifier in the test and validation 
-TODO: Transformations for MNIST for contrastive - 30 degree rotation, shift 0.25 of the height and width, shear up to 45, zoom in range 0.5 to 1.5
 
 `python3 -m src.train -p avg -a gelu -l 0.01 --batch-size 2048 --pretrain --embedding 256 --pos-margin 1.5 --neg-margin 0 --preprocess`
 
@@ -94,7 +93,11 @@ TODO: Transformations for MNIST for contrastive - 30 degree rotation, shift 0.25
 - Increasing intermediate from 32 to 50 improve disentanglement.
 
 - At this point we might need to try some learning rate decay. The components in the NN pipeline seem to be able to separate the classes, but we are not learning the network in the most appropriate way.
-`python3 -m src.train --epoch 40 -p avg -a gelu -l 0.005 --batch-size 2048 --pretrain --embedding 256 --pos-margin 2 --neg-margin 0 --preprocess --stn`
+`python3 -m src.train --epoch 40 -p avg -a gelu -l 0.005 --batch-size 2048 --pretrain --embedding 256 --pos-margin 2 --neg-margin 0 --preprocess --stn --stn-latent-dim 16`
+
+TODO: Try intelligent augmentation schemes i.e. RandAugment
+
+`python3 -m src.train --epoch 20 -p avg -a gelu -l 0.005 --batch-size 2048 --pretrain --embedding 256 --pos-margin 2 --neg-margin 0 --stn --stn-latent-dim 16 --preprocess RandAffine`
 
 ## Useful Links
 - https://ealizadeh.com/blog/guide-to-python-env-pkg-dependency-using-conda-poetry/

@@ -30,6 +30,7 @@ def train_mnist_classifier(trainer, batch_size, lr, pooling, activation, seed):
 def train_mnist_contrastive(
     trainer,
     batch_size,
+    no_normalise,
     embedding,
     lr,
     pooling,
@@ -40,9 +41,10 @@ def train_mnist_contrastive(
     preprocess: bool = False,
     dropout: float = 0.5,
     stn: bool = False,
+    stn_latent_dim: int = 32,
 ):
     seed_everything(seed)
-    dm = get_datamodule(batch_size)
+    dm = get_datamodule(batch_size, no_normalise)
     model = MNISTSupContrast(
         activ,
         pooling,
@@ -53,6 +55,7 @@ def train_mnist_contrastive(
         preprocess,
         dropout,
         stn,
+        stn_latent_dim,
     )
     trainer.fit(model, datamodule=dm)
 
@@ -70,10 +73,14 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--val-check-freq", type=int, default=5)
     parser.add_argument("-pm", "--pos-margin", type=float, default=1.5)
     parser.add_argument("-nm", "--neg-margin", type=float, default=0.5)
-    parser.add_argument("-pr", "--preprocess", action="store_true")
+    parser.add_argument(
+        "-pr", "--preprocess", default=None, choices=["RandAffine", "RandAug"]
+    )
     parser.add_argument("-dr", "--dropout", type=float, default=0)
     parser.add_argument("-st", "--stn", action="store_true")
     parser.add_argument("-s", "--seed", type=int, default=1234)
+    parser.add_argument("-n", "--no-normalise", action="store_true")
+    parser.add_argument("-stdim", "--stn-latent-dim", type=int, default=32)
     args = parser.parse_args()
 
     if not args.pretrain:
@@ -84,7 +91,7 @@ if __name__ == "__main__":
                 ModelCheckpoint(
                     save_last=True,
                     monitor="Validation Loss",
-                    filename="epoch={epoch:02d}-loss={Validation Loss:.5f}-acc={Validation Accuracy:.5f}",  # noqa: E501
+                    filename="epoch={epoch:02d}-loss={Validation Loss:.9f}-acc={Validation Accuracy:.9f}",  # noqa: E501
                 ),
             ],
         )
@@ -104,13 +111,14 @@ if __name__ == "__main__":
                 ModelCheckpoint(
                     save_last=True,
                     monitor="Validation Loss",
-                    filename="epoch={epoch:02d}-loss={Validation Loss:.5f}",
+                    filename="epoch={epoch:02d}-loss={Validation Loss:.9f}",
                 ),
             ],
         )
         train_mnist_contrastive(
             trainer,
             args.batch_size,
+            args.no_normalise,
             args.embedding,
             args.lr,
             args.pooling,
@@ -121,4 +129,5 @@ if __name__ == "__main__":
             args.preprocess,
             args.dropout,
             args.stn,
+            args.stn_latent_dim,
         )

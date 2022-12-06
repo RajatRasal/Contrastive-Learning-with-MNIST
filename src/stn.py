@@ -8,25 +8,26 @@ import torch.nn.functional as F
 
 
 class MNISTSpatialTransformer(nn.Module):
-    def __init__(self):
+    def __init__(self, localization_latent_dim: int = 16):
         super().__init__()
+
+        self.localization_latent_dim = localization_latent_dim
 
         # Spatial transformer localization-network
         self.localization = nn.Sequential(
             nn.Conv2d(1, 8, kernel_size=7),
             nn.MaxPool2d(2, stride=2),
-            nn.ReLU(True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(8, 10, kernel_size=5),
             nn.MaxPool2d(2, stride=2),
-            nn.ReLU(True),
+            nn.ReLU(inplace=True),
         )
 
         # Regressor for the 3 * 2 affine matrix
-        _intermediate = 16
         self.fc_loc = nn.Sequential(
-            nn.Linear(10 * 3 * 3, _intermediate),
-            nn.ReLU(True),
-            nn.Linear(_intermediate, 3 * 2),
+            nn.Linear(10 * 3 * 3, self.localization_latent_dim),
+            nn.ReLU(inplace=True),
+            nn.Linear(self.localization_latent_dim, 3 * 2),
         )
 
         # Initialize the weights/bias with identity transformation
